@@ -9,4 +9,5 @@ langchain-community
 langchain-google-genai
 langchain-experimental
 langchain-huggingface
+langgraph
 # -e .
