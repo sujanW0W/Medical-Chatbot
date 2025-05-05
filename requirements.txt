@@ -1,6 +1,6 @@
 sentence-transformers
 langchain
-flask
+torch
 pypdf
 python-dotenv
 pinecone-client
@@ -10,5 +10,6 @@ langchain-google-genai
 langchain-experimental
 langchain-huggingface
 langgraph
+duckduckgo-search
 streamlit
 # -e .

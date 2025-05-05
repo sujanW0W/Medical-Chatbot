@@ -1,6 +1,7 @@
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
+from sentence_transformers import SentenceTransformer
 
 """
     This function loads the pdf file from the data directory
@@ -35,6 +36,16 @@ def text_split(documents):
 
 
 def download_embedding_model():
-    embedding_model = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2")
-    return embedding_model
+    """
+    Downloads and returns both the Langchain embedding interface and the raw SentenceTransformer model.
+    """
+
+    model_name = "sentence-transformers/all-MiniLM-L6-v2"
+
+    langchain_embeddings = HuggingFaceEmbeddings(
+        model_name=model_name
+    )
+
+    raw_embedding_model = SentenceTransformer(model_name)
+
+    return langchain_embeddings, raw_embedding_model

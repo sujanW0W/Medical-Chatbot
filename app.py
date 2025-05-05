@@ -1,5 +1,5 @@
 import streamlit as st
-from agent import graph, config
+from src.orchestrator import graph, config
 
 st.set_page_config(page_title="Medical Chatbot",
                    page_icon="🤖", layout="centered", )
