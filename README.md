@@ -119,11 +119,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Collaborators
 
-[@sujanW0W]()
+[@sujanW0W](https://github.com/sujanW0W)
 
-[@Akatzz12]()
+[@Akatzz12](https://github.com/Akatzz12)
 
-[@Aayush-lamsal]()
+[@Aayush-lamsal](https://github.com/aayush-lamsal)
 
 ## Contact
 
