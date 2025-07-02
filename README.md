@@ -33,7 +33,6 @@ The system’s workflow is non-deterministic and adapts dynamically to the compl
 | Web Search      | DuckDuckGo API                       |
 | Orchestration   | LangChain + LangGraph                |
 | UI              | Streamlit                            |
-| PDF Parsing     | PyPDFLoader                          |
 
 ---
 
