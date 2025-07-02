@@ -14,7 +14,7 @@ The system’s workflow is non-deterministic and adapts dynamically to the compl
 4.  **Context Synthesis:** The Synthesis Agent receives the original query, along with any retrieved documents from the knowledge base and results from web searches. It consolidates and structures this diverse information into a coherent context, preparing it for the final response generation.
 5.  **Response Generation:** The structured context is passed to the Google Gemini 1.5 Flash LLM. The LLM uses this augmented information to generate a final, accurate, and medically relevant response, which is then displayed back to the user in the Streamlit interface.
 
-## 🚀 Features
+## 💡 Features
 
 -   **Multi-Agent Architecture:** Utilizes specialized agents for distinct tasks (retrieval, web search, synthesis) orchestrated by another LLM-powered agent.
 -   **Retrieval Augmented Generation (RAG):** Combines retrieval from the knowledge base and web search results with the LLM's capabilities to generate informed responses.
@@ -34,7 +34,7 @@ The system’s workflow is non-deterministic and adapts dynamically to the compl
 | Orchestration   | LangChain + LangGraph                |
 | UI              | Streamlit                            |
 
-## Prerequisites
+## ✅ Prerequisites
 
 -   Python 3.9+
 -   Pinecone API key
@@ -42,7 +42,7 @@ The system’s workflow is non-deterministic and adapts dynamically to the compl
 -   DuckDuckGo API access
 -   LangChain & LangGraph
 
-## Installation
+## ⚙️ Installation
 
 1. Clone the repository:
 
@@ -71,7 +71,7 @@ PINECONE_API_KEY=your_pinecone_api_key
 GOOGLE_API_KEY=your_google_api_key
 ```
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 medical-chatbot/
@@ -98,7 +98,7 @@ medical-chatbot/
 └── README.md
 ```
 
-## Usage
+## 🚀 Usage
 
 1.  **Populate the Pinecone index:** Before running the application for the first time, you need to process the medical documents (extraction, chunking, and embeddings) and upload them to your Pinecone index.
 
@@ -128,7 +128,7 @@ medical-chatbot/
 
 4.  **Start chatting with the medical bot!**
 
-## Result
+## 📊 Result
 
 The system was tested with 20 diverse medical queries related to diseases, diagnosis, and drugs.
 
@@ -139,17 +139,17 @@ The system was tested with 20 diverse medical queries related to diseases, diagn
     -   Maintains conversational context
     -   Generates informative, non-hallucinated answers
 
-## Preview
+## 🖼️ Preview
 
 Here is a screenshot of the chatbot interface:
 
 ![Chatbot Interface](/assets/Result.png)
 
-## License
+## 📜 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 -   LangChain for providing the framework components.
 -   Google for the powerful Gemini language model.
@@ -157,7 +157,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 -   DuckDuckGo Search for the web search capabilities.
 -   Streamlit for enabling rapid development of the web interface.
 
-## Collaborators
+## 👨‍💻 Collaborators
 
 [@sujanW0W](https://github.com/sujanW0W)
 
@@ -165,6 +165,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [@Aayush-lamsal](https://github.com/aayush-lamsal)
 
-## Contact
+## 📧 Contact
 
 Email: [Sujan Maharjan](mailto:sujan.maharjan.1@ndsu.edu)
