@@ -2,6 +2,8 @@
 
 A sophisticated medical chatbot leveraging LangGraph, LangChain, and Google's Gemini model to provide accurate medical information through a multi-agent system.
 
+![Architecture](/assets/Architecture.png)
+
 ## Features
 
 -   Multi-agent architecture for intelligent query processing
