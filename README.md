@@ -139,7 +139,7 @@ The system was tested with 20 diverse medical queries related to diseases, diagn
     -   Maintains conversational context
     -   Generates informative, non-hallucinated answers
 
-# Preview
+## Preview
 
 Here is a screenshot of the chatbot interface:
 
