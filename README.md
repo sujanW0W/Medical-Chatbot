@@ -34,8 +34,6 @@ The system’s workflow is non-deterministic and adapts dynamically to the compl
 | Orchestration   | LangChain + LangGraph                |
 | UI              | Streamlit                            |
 
----
-
 ## Prerequisites
 
 -   Python 3.9+
