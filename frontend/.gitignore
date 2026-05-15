@@ -23,4 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
+<<<<<<< HEAD
 !lib/
+=======
+!lib/
+>>>>>>> 331554d (feat: prevented ignoring lib)
