@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from src.orchestrator import graph
-from api.sql import SessionLocal
+from api.database import SessionLocal
 from api.models import *
 from api.types import *
 

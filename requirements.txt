@@ -1,15 +1,23 @@
 sentence-transformers
 langchain
 torch
+transformers
 pypdf
 python-dotenv
 pinecone-client
-langchain-pinecone
 langchain-community
 langchain-google-genai
 langchain-experimental
 langchain-huggingface
+langchain-pinecone
 langgraph
-duckduckgo-search
+ddgs
 streamlit
+langchain-text-splitters
+fastapi[standard]
+google-genai
+pydantic
+SQLAlchemy
+alembic
+psycopg2
 # -e .

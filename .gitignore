@@ -168,3 +168,7 @@ cython_debug/
 
 # SQLite database
 *.db
+
+
+# Frontend
+node_modules

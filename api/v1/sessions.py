@@ -3,7 +3,7 @@ from fastapi import APIRouter, status
 from api.helper import *
 from api.types import *
 from api.utils import project_return
-from api.sql import SessionLocal
+from api.database import SessionLocal
 from api.models import *
 from api.response_models import *
 

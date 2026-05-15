@@ -1,0 +1,29 @@
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, event
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker
+
+load_dotenv()
+
+DB_NAME = os.getenv("DB_NAME")
+
+user = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+host = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
+
+DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{DB_NAME}"
+
+engine = create_engine(
+    DATABASE_URL, echo=True)
+
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+# SQLite Foreign key
+# @event.listens_for(Engine, "connect")
+# def set_sqlite_pragma(dbapi_connection, connection_record):
+#     if isinstance(dbapi_connection, Sqlite3Connection):
+#         cursor = dbapi_connection.cursor()
+#         cursor.execute("PRAGMA foreign_keys = ON")
+#         cursor.close()
