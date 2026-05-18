@@ -9,8 +9,6 @@ from api.response_models import *
 
 router = APIRouter()
 
-DB_NAME = os.getenv("DB_NAME")
-
 
 @router.get("/")
 def get_sessions():
