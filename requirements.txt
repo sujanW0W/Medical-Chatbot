@@ -10,14 +10,15 @@ langchain-google-genai
 langchain-experimental
 langchain-huggingface
 langchain-pinecone
+langchain-core
+langchain-text-splitters
 langgraph
 ddgs
 streamlit
-langchain-text-splitters
 fastapi[standard]
 google-genai
 pydantic
 SQLAlchemy
 alembic
-psycopg2
+psycopg2-binary
 # -e .

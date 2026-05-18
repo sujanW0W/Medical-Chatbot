@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
-from langchain.tools import Tool
+from langchain_core.tools import Tool
 from .base import BaseAgent
 from .state import AgentState
 
