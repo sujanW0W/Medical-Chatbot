@@ -6,14 +6,14 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-POSTGRES_NAME = os.getenv("POSTGRES_NAME")
+db = os.getenv("POSTGRES_DB")
 
 user = os.getenv("POSTGRES_USER")
 password = os.getenv("POSTGRES_PASSWORD")
 host = os.getenv("POSTGRES_HOST")
 port = os.getenv("POSTGRES_PORT")
 
-DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{POSTGRES_NAME}"
+DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}"
 
 engine = create_engine(
     DATABASE_URL, echo=True)
