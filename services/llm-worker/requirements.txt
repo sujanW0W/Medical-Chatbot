@@ -1,0 +1,20 @@
+sentence-transformers
+langchain
+torch
+transformers
+pypdf
+python-dotenv
+pinecone-client
+langchain-community
+langchain-google-genai
+langchain-experimental
+langchain-huggingface
+langchain-pinecone
+langchain-core
+langchain-text-splitters
+langgraph
+ddgs
+streamlit
+google-genai
+pydantic
+# -e .
