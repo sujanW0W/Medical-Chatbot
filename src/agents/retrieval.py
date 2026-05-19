@@ -1,4 +1,4 @@
-from langchain.schema import BaseRetriever
+from langchain_core.retrievers import BaseRetriever
 from .base import BaseAgent
 from .state import AgentState
 from sentence_transformers import SentenceTransformer, util
@@ -38,7 +38,7 @@ class RetrievalAgent(BaseAgent):
         print("## Running Retrieval Agent ##")
 
         query = state["messages"][-1].content
-        docs = self.retriever.get_relevant_documents(query)
+        docs = self.retriever.invoke(query)
         relevance_score = self._calculate_relevance(docs, query)
 
         return {

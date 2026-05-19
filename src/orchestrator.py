@@ -32,7 +32,7 @@ doc_store = PineconeVectorStore.from_existing_index(
 retriever = doc_store.as_retriever(
     search_type="similarity", search_kwargs={"k": 3})
 
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
 
 memory_saver = MemorySaver()
 
