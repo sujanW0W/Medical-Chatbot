@@ -1,8 +1,8 @@
 from sqlalchemy import select
-from src.orchestrator import graph
-from api.database import SessionLocal
-from api.models import *
-from api.types import *
+from database import SessionLocal
+from models.sessions import Session, Conversation
+from models.jobs import Job, JobStatus
+from types import *
 
 
 def create_session():
@@ -13,23 +13,25 @@ def create_session():
     return session_instance
 
 
-def generate_title(session_id: str, user_msg, ai_msg):
+def generate_title(session_id: str, user_msg):
     try:
-        prompt = f"""
-Generate a short 3-6 word title for this conversation.
+        #         prompt = f"""
+        # Generate a short 3-6 word title for this conversation.
 
-User: {user_msg}
+        # User: {user_msg}
 
-Assistant: {ai_msg}
+        # Assistant: {ai_msg}
 
-Return only the title.
-"""
+        # Return only the title.
+        # """
 
-        response = graph.invoke({
-            "messages": [prompt]
-        })
+        #         response = graph.invoke({
+        #             "messages": [prompt]
+        #         })
 
-        title = response["messages"][-1].content
+        #         title = response["messages"][-1].content
+
+        title = ' '.join(user_msg["content"].split()[:10])
 
         with SessionLocal.begin() as session:
             stmt = select(Session).where(Session.id == session_id)
@@ -59,3 +61,52 @@ def session_exists(session_id: str):
         if not s:
             return False
         return True
+
+
+def create_job(conversation: Conversation):
+    with SessionLocal.begin() as session:
+        job = Job(conversation_id=conversation.id)
+        session.add(job)
+
+    return job
+
+
+def update_job_status(job_id: str, job_status: str):
+    try:
+        with SessionLocal.begin() as session:
+            stmt = select(Job).where(Job.id == job_id)
+            job = session.scalar(stmt)
+
+            job.status = JobStatus[job_status]
+
+    except Exception as e:
+        print(e)
+        raise Exception(e)
+
+
+def update_job_success(job_id: str, result_conversation_id: str):
+    try:
+        with SessionLocal.begin() as session:
+            stmt = select(Job).where(Job.id == job_id)
+            job = session.scalar(stmt)
+
+            job.status = JobStatus["SUCCESS"]
+            job.result_conversation_id = result_conversation_id
+
+    except Exception as e:
+        print(e)
+        raise Exception(e)
+
+
+def update_job_failure(job_id: str, failed_conversation_id: str):
+    try:
+        with SessionLocal.begin() as session:
+            stmt = select(Job).where(Job.id == job_id)
+            job = session.scalar(stmt)
+
+            job.status = JobStatus["FAILED"]
+            job.error_conversation_id = failed_conversation_id
+
+    except Exception as e:
+        print(e)
+        raise Exception(e)
