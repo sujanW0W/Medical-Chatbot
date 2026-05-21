@@ -1,10 +1,7 @@
 from sqlalchemy import ForeignKey, String, Text, DateTime, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 import uuid
-
-
-class Base(DeclarativeBase):
-    pass
+from database import Base
 
 
 class Session(Base):

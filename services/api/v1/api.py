@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from api.v1.sessions import router as session_router
-from api.v1.chat import router as chat_router
+from v1.sessions import router as session_router
+from v1.chat import router as chat_router
 
 
 router = APIRouter()

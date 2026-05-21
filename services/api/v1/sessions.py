@@ -1,11 +1,10 @@
-import os
 from fastapi import APIRouter, status
-from api.helper import *
-from api.types import *
-from api.utils import project_return
-from api.database import SessionLocal
-from api.models import *
-from api.response_models import *
+from helper import *
+from schemas import *
+from utils import project_return
+from database import SessionLocal
+from models.sessions import Session
+from response_models import *
 
 router = APIRouter()
 
