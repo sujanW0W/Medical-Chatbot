@@ -11,7 +11,7 @@ def invoke_llm(job_id, session_id, msg):
     try:
         status = "PROCESSING"
         requests.patch(
-            f"{BACKEND_URL}/job-status-change/{job_id}/{status}"
+            f"{BACKEND_URL}/jobs/job-status-change/{job_id}/{status}"
         )
 
         response = graph.invoke({
@@ -20,7 +20,7 @@ def invoke_llm(job_id, session_id, msg):
 
         status = "SUCCESS"
         requests.post(
-            f"{BACKEND_URL}/add-conversation/{session_id}/{job_id}/{status}",
+            f"{BACKEND_URL}/jobs/add-conversation/{session_id}/{job_id}/{status}",
             json={
                 "content": response["messages"][-1].content
             }
@@ -29,7 +29,7 @@ def invoke_llm(job_id, session_id, msg):
     except Exception as e:
         status = "FAILED"
         requests.post(
-            f"{BACKEND_URL}/add-conversation/{session_id}/{job_id}/{status}",
+            f"{BACKEND_URL}/jobs/add-conversation/{session_id}/{job_id}/{status}",
             json={
                 "content": str(e)
             }

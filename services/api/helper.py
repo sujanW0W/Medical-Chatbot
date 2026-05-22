@@ -2,7 +2,7 @@ from sqlalchemy import select
 from database import SessionLocal
 from models.sessions import Session, Conversation
 from models.jobs import Job, JobStatus
-from types import *
+from schemas import *
 
 
 def create_session():
