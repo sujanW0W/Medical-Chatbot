@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from v1.sessions import router as session_router
 from v1.chat import router as chat_router
-
+from v1.job import router as job_router
 
 router = APIRouter()
 
@@ -13,3 +13,4 @@ def root():
 
 router.include_router(session_router, prefix="/sessions", tags=["Sessions"])
 router.include_router(chat_router, prefix="/chat", tags=["Chat"])
+router.include_router(job_router, prefix="/jobs", tags=["Jobs"])

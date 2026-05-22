@@ -17,4 +17,8 @@ ddgs
 streamlit
 google-genai
 pydantic
+celery
+flower
+
+
 # -e .

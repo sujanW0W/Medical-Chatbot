@@ -21,4 +21,7 @@ pydantic
 SQLAlchemy
 alembic
 psycopg2-binary
+celery
+flower
+
 # -e .
