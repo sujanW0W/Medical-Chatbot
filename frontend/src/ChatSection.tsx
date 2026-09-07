@@ -5,21 +5,21 @@ import { LoaderCircle } from "lucide-react"
 import { useSession } from "./contexts/SessionContext"
 
 export default function ChatSection() {
-    const {activeSessionId} = useSession()
+    const { activeSessionId } = useSession()
 
-    const {data, isLoading} = useQuery({queryKey:["messages", activeSessionId], queryFn: () => fetchMessages(activeSessionId)})
+    const { data, isLoading } = useQuery({ queryKey: ["messages", activeSessionId], queryFn: () => fetchMessages(activeSessionId), refetchInterval: 5_000 })
 
     return (
         <>
             {
                 isLoading
-                ? <div className="w-full h-full flex justify-center items-center">
-                    <LoaderCircle size={20} className="animate-spin" />
-                </div>
-                : data && data.map(msg => (
-                    <ChatBox key={msg.id} message={msg} />
+                    ? <div className="w-full h-full flex justify-center items-center">
+                        <LoaderCircle size={20} className="animate-spin" />
+                    </div>
+                    : data && data.map(msg => (
+                        <ChatBox key={msg.id} message={msg} />
 
-                ))
+                    ))
             }
         </>
     )
