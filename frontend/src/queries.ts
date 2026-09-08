@@ -22,6 +22,33 @@ export const fetchMessages = async (sessionId: string | undefined) => {
     return data || [];
 };
 
+export const renameSession = async ({
+    sessionId,
+    name,
+}: {
+    sessionId: string;
+    name: string;
+}) => {
+    const res = await request({
+        endpoint: `sessions/${sessionId}/rename`,
+        method: "PUT",
+        body: {
+            content: name,
+        },
+    });
+
+    return res.data;
+};
+
+export const deleteSession = async (sessionId: string) => {
+    const res = await request({
+        endpoint: `sessions/${sessionId}`,
+        method: "DELETE",
+    });
+
+    return res.data;
+};
+
 export const sendQuery = async ({
     sessionId,
     query,
