@@ -1,10 +1,11 @@
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
-import { Send } from "lucide-react"
+import { LoaderCircle, Send } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { sendQuery } from "./queries"
 import { useSession } from "./contexts/SessionContext"
 import type { Session } from "./types"
+import { cn } from "./lib/utils"
 
 export default function ChatInput() {
     const { activeSessionId, setActiveSessionId } = useSession()
@@ -15,16 +16,31 @@ export default function ChatInput() {
 
     const mutation = useMutation({
         mutationFn: sendQuery,
-        onSuccess: async (data) => {
+        onSuccess: async () => {
             setQuery("")
-            if (!activeSessionId) {
+
+            let sessionId = activeSessionId
+
+            if (!sessionId) {
                 await queryClient.invalidateQueries({ queryKey: ["sessions"] })
                 const sessions = queryClient.getQueryData<Array<Session>>(["sessions"])
-                setActiveSessionId(sessions?.[0]?.id)
+                sessionId = sessions?.[0]?.id
+                setActiveSessionId(sessionId)
             }
-            queryClient.invalidateQueries({ queryKey: ["messages", activeSessionId] })
+
+            queryClient.invalidateQueries({ queryKey: ["messages", sessionId] })
         }
     })
+
+    const canSend = query.trim().length > 0 && !mutation.isPending
+
+    const submit = () => {
+        if (!canSend) return
+        mutation.mutate({
+            sessionId: activeSessionId,
+            query: query
+        })
+    }
 
     return (
         <div className="flex flex-row gap-2 items-center m-auto">
@@ -32,22 +48,26 @@ export default function ChatInput() {
                 placeholder="Ask Chatbot"
                 className=" resize-none rounded-2xl bg-foreground/10 min-h-20 max-h-40 text-base focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                 value={query}
+                disabled={mutation.isPending}
                 onChange={event => setQuery(event.target.value)}
                 onKeyDown={event => {
-                    if (event.key == "Enter") {
+                    if (event.key === "Enter" && !event.shiftKey) {
                         event.preventDefault()
-                        mutation.mutate({
-                            sessionId: activeSessionId,
-                            query: query
-                        })
+                        submit()
                     }
                 }}
             />
-            <div className="p-2 cursor-pointer rounded-full hover:bg-foreground/15" onClick={() => mutation.mutate({
-                sessionId: activeSessionId,
-                query: query
-            })}>
-                <Send size={20} />
+            <div
+                className={cn(
+                    "p-2 rounded-full",
+                    canSend ? "cursor-pointer hover:bg-foreground/15" : "cursor-not-allowed opacity-50"
+                )}
+                onClick={submit}
+            >
+                {mutation.isPending
+                    ? <LoaderCircle size={20} className="animate-spin" />
+                    : <Send size={20} />
+                }
             </div>
         </div>
     )

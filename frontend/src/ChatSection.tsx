@@ -7,7 +7,12 @@ import { useSession } from "./contexts/SessionContext"
 export default function ChatSection() {
     const { activeSessionId } = useSession()
 
-    const { data, isLoading } = useQuery({ queryKey: ["messages", activeSessionId], queryFn: () => fetchMessages(activeSessionId), refetchInterval: 5_000 })
+    const { data, isLoading } = useQuery({
+        queryKey: ["messages", activeSessionId], queryFn: () => fetchMessages(activeSessionId), refetchInterval: () => {
+            if (!activeSessionId) return false
+            return 5_000
+        }
+    })
 
     return (
         <>
