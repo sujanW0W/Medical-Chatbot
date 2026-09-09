@@ -2,9 +2,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"
 import { LoaderCircle, Send } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { sendQuery } from "./queries"
+import { fetchSessions, sendQuery } from "./queries"
 import { useSession } from "./contexts/SessionContext"
-import type { Session } from "./types"
 import { cn } from "./lib/utils"
 
 export default function ChatInput() {
@@ -22,8 +21,7 @@ export default function ChatInput() {
             let sessionId = activeSessionId
 
             if (!sessionId) {
-                await queryClient.invalidateQueries({ queryKey: ["sessions"] })
-                const sessions = queryClient.getQueryData<Array<Session>>(["sessions"])
+                const sessions = await queryClient.fetchQuery({ queryKey: ["sessions"], queryFn: fetchSessions })
                 sessionId = sessions?.[0]?.id
                 setActiveSessionId(sessionId)
             }

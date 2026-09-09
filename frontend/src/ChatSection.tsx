@@ -8,9 +8,14 @@ export default function ChatSection() {
     const { activeSessionId } = useSession()
 
     const { data, isLoading } = useQuery({
-        queryKey: ["messages", activeSessionId], queryFn: () => fetchMessages(activeSessionId), refetchInterval: () => {
+        queryKey: ["messages", activeSessionId],
+        queryFn: () => fetchMessages(activeSessionId),
+        enabled: !!activeSessionId,
+        refetchInterval: (query) => {
             if (!activeSessionId) return false
-            return 5_000
+            if (query.state.error) return false
+            const lastRole = query.state.data?.at(-1)?.role
+            return lastRole == "user" ? 5_000 : false
         }
     })
 

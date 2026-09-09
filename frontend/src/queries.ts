@@ -37,6 +37,10 @@ export const renameSession = async ({
         },
     });
 
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
     return res.data;
 };
 
@@ -45,6 +49,10 @@ export const deleteSession = async (sessionId: string) => {
         endpoint: `sessions/${sessionId}`,
         method: "DELETE",
     });
+
+    if (res.error) {
+        throw new Error(res.error)
+    }
 
     return res.data;
 };
