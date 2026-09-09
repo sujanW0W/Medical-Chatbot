@@ -27,6 +27,9 @@ export default function ChatInput() {
             }
 
             queryClient.invalidateQueries({ queryKey: ["messages", sessionId] })
+        },
+        onError: (error) => {
+            console.log(error)
         }
     })
 

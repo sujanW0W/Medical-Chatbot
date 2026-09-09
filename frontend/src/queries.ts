@@ -3,6 +3,8 @@ import type { ChatResponse, Message, Session } from "./types";
 
 export const fetchSessions = async () => {
     const res = await request<Array<Session>>({ endpoint: "sessions/" });
+    if (res.error)
+        throw new Error(res.error)
     let data = res.data;
     data =
         data?.sort(
@@ -17,6 +19,9 @@ export const fetchMessages = async (sessionId: string | undefined) => {
     const res = await request<Array<Message>>({
         endpoint: `sessions/${sessionId}/conversations`,
     });
+    if (res.error) {
+        throw new Error(res.error)
+    }
     const data = res.data;
 
     return data || [];
@@ -75,6 +80,9 @@ export const sendQuery = async ({
             content: query,
         },
     });
+
+    if (res.error)
+        throw new Error(res.error)
 
     const data = res.data;
 
