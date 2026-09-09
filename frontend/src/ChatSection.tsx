@@ -1,13 +1,13 @@
 import ChatBox from "./ChatBox"
 import { useQuery } from "@tanstack/react-query"
 import { fetchMessages } from "./queries"
-import { LoaderCircle } from "lucide-react"
+import { CircleAlert, LoaderCircle } from "lucide-react"
 import { useSession } from "./contexts/SessionContext"
 
 export default function ChatSection() {
     const { activeSessionId } = useSession()
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, isError, error } = useQuery({
         queryKey: ["messages", activeSessionId],
         queryFn: () => fetchMessages(activeSessionId),
         enabled: !!activeSessionId,
@@ -26,10 +26,15 @@ export default function ChatSection() {
                     ? <div className="w-full h-full flex justify-center items-center">
                         <LoaderCircle size={20} className="animate-spin" />
                     </div>
-                    : data && data.map(msg => (
-                        <ChatBox key={msg.id} message={msg} />
+                    : isError && !data
+                        ? <div className="w-full h-full flex flex-col gap-2 items-center justify-center text-center text-foreground/60">
+                            <CircleAlert size={20} />
+                            <p className="text-sm">{error?.message || "Couldn't load messages. Please try again."}</p>
+                        </div>
+                        : data && data.map(msg => (
+                            <ChatBox key={msg.id} message={msg} />
 
-                    ))
+                        ))
             }
         </>
     )
