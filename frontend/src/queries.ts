@@ -3,6 +3,8 @@ import type { ChatResponse, Message, Session } from "./types";
 
 export const fetchSessions = async () => {
     const res = await request<Array<Session>>({ endpoint: "sessions/" });
+    if (res.error)
+        throw new Error(res.error)
     let data = res.data;
     data =
         data?.sort(
@@ -17,9 +19,47 @@ export const fetchMessages = async (sessionId: string | undefined) => {
     const res = await request<Array<Message>>({
         endpoint: `sessions/${sessionId}/conversations`,
     });
+    if (res.error) {
+        throw new Error(res.error)
+    }
     const data = res.data;
 
     return data || [];
+};
+
+export const renameSession = async ({
+    sessionId,
+    name,
+}: {
+    sessionId: string;
+    name: string;
+}) => {
+    const res = await request({
+        endpoint: `sessions/${sessionId}/rename`,
+        method: "PUT",
+        body: {
+            content: name,
+        },
+    });
+
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
+    return res.data;
+};
+
+export const deleteSession = async (sessionId: string) => {
+    const res = await request({
+        endpoint: `sessions/${sessionId}`,
+        method: "DELETE",
+    });
+
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
+    return res.data;
 };
 
 export const sendQuery = async ({
@@ -40,6 +80,9 @@ export const sendQuery = async ({
             content: query,
         },
     });
+
+    if (res.error)
+        throw new Error(res.error)
 
     const data = res.data;
 
