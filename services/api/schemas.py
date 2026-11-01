@@ -9,3 +9,8 @@ class Message(BaseModel):
 
 class Query(BaseModel):
     content: str
+
+
+class JobCompletionReport(BaseModel):
+    session_id: str
+    content: str

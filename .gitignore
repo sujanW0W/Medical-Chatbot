@@ -189,3 +189,6 @@ build/
 !infra/
 !docs/
 !.github/
+
+
+CLAUDE.md

@@ -31,6 +31,17 @@ export interface Session {
 }
 
 export interface ChatResponse {
-    session_id: string;
-    messages: Array<Message>;
+    job_id: string;
+}
+
+export type JobStatus = "queued" | "processing" | "failed" | "success" | "cancelled";
+
+export interface Job {
+    id: string;
+    conversation_id: string;
+    status: JobStatus;
+    result_conversation_id: string | null;
+    error_conversation_id: string | null;
+    created_at: string;
+    updated_at: string;
 }

@@ -27,6 +27,7 @@ export default function ChatInput() {
             }
 
             queryClient.invalidateQueries({ queryKey: ["messages", sessionId] })
+            queryClient.invalidateQueries({ queryKey: ["latest-job", sessionId] })
         },
         onError: (error) => {
             console.log(error)

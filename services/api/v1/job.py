@@ -39,30 +39,37 @@ def update_status(job_id: str, job_status: Literal["PROCESSING"] | Literal["CANC
     )
 
 
-@router.post('/add-conversation/{session_id}/{job_id}/{job_status}')
-def post_conversation(session_id: str, job_id: str, job_status: Literal["SUCCESS"] | Literal["FAILED"], query: Query):
+@router.post('/{job_id}/success')
+def job_success(job_id: str, body: JobCompletionReport):
     ai_msg: Message = {
         "role": "assistant",
-        "content": query.content
+        "content": body.content
     }
 
-    if job_status == "SUCCESS":
-        convo = add_conversation(session_id, ai_msg)
-        update_job_success(job_id, convo.id)
-
-    elif job_status == "FAILED":
-        convo = add_conversation(session_id, ai_msg)
-        update_job_failure(job_id, convo.id)
-
-    else:
-        return project_return(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            error="Wrong job status"
-        )
+    convo = add_conversation(body.session_id, ai_msg)
+    update_job_success(job_id, convo.id)
 
     return project_return(
         status_code=status.HTTP_200_OK,
         data={
-            "message": "Conversation inserted and job status updated successfully."
+            "message": "Conversation inserted and job marked successful."
+        }
+    )
+
+
+@router.post('/{job_id}/failure')
+def job_failure(job_id: str, body: JobCompletionReport):
+    ai_msg: Message = {
+        "role": "assistant",
+        "content": body.content
+    }
+
+    convo = add_conversation(body.session_id, ai_msg)
+    update_job_failure(job_id, convo.id)
+
+    return project_return(
+        status_code=status.HTTP_200_OK,
+        data={
+            "message": "Conversation inserted and job marked failed."
         }
     )
