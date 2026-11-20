@@ -58,6 +58,37 @@ def get_conversations(session_id: str):
         )
 
 
+@router.get("/{session_id}/latest-job")
+def get_latest_job(session_id: str):
+    try:
+        if not session_exists(session_id):
+            return project_return(
+                status_code=status.HTTP_404_NOT_FOUND,
+                error="Session does not exist"
+            )
+
+        job = get_latest_job_for_session(session_id)
+        if not job:
+            return project_return(
+                status_code=status.HTTP_200_OK,
+                data=None
+            )
+
+        job_data = JobSchema.model_validate(job).model_dump(mode="json")
+
+        return project_return(
+            status_code=status.HTTP_200_OK,
+            data=job_data
+        )
+
+    except Exception as e:
+        print(e)
+        return project_return(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            error="Something went wrong"
+        )
+
+
 @router.put("/{session_id}/rename")
 def rename_session(session_id: str, query: Query):
     try:

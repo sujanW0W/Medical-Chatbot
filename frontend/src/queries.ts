@@ -1,5 +1,5 @@
 import { request } from "./api/requests";
-import type { ChatResponse, Message, Session } from "./types";
+import type { ChatResponse, Job, Message, Session } from "./types";
 
 export const fetchSessions = async () => {
     const res = await request<Array<Session>>({ endpoint: "sessions/" });
@@ -25,6 +25,19 @@ export const fetchMessages = async (sessionId: string | undefined) => {
     const data = res.data;
 
     return data || [];
+};
+
+export const fetchLatestJob = async (sessionId: string | undefined) => {
+    if (!sessionId) return null;
+
+    const res = await request<Job | null>({
+        endpoint: `sessions/${sessionId}/latest-job`,
+    });
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
+    return res.data ?? null;
 };
 
 export const renameSession = async ({

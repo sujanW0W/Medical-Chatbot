@@ -110,3 +110,15 @@ def update_job_failure(job_id: str, failed_conversation_id: str):
     except Exception as e:
         print(e)
         raise Exception(e)
+
+
+def get_latest_job_for_session(session_id: str):
+    with SessionLocal() as session:
+        stmt = (
+            select(Job)
+            .join(Conversation, Job.conversation_id == Conversation.id)
+            .where(Conversation.session_id == session_id)
+            .order_by(Job.created_at.desc())
+            .limit(1)
+        )
+        return session.scalar(stmt)
