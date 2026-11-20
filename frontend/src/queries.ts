@@ -1,0 +1,103 @@
+import { request } from "./api/requests";
+import type { ChatResponse, Job, Message, Session } from "./types";
+
+export const fetchSessions = async () => {
+    const res = await request<Array<Session>>({ endpoint: "sessions/" });
+    if (res.error)
+        throw new Error(res.error)
+    let data = res.data;
+    data =
+        data?.sort(
+            (a, b) => -(Date.parse(a.updated_at) - Date.parse(b.updated_at)),
+        ) || [];
+    return data;
+};
+
+export const fetchMessages = async (sessionId: string | undefined) => {
+    if (!sessionId) return [];
+
+    const res = await request<Array<Message>>({
+        endpoint: `sessions/${sessionId}/conversations`,
+    });
+    if (res.error) {
+        throw new Error(res.error)
+    }
+    const data = res.data;
+
+    return data || [];
+};
+
+export const fetchLatestJob = async (sessionId: string | undefined) => {
+    if (!sessionId) return null;
+
+    const res = await request<Job | null>({
+        endpoint: `sessions/${sessionId}/latest-job`,
+    });
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
+    return res.data ?? null;
+};
+
+export const renameSession = async ({
+    sessionId,
+    name,
+}: {
+    sessionId: string;
+    name: string;
+}) => {
+    const res = await request({
+        endpoint: `sessions/${sessionId}/rename`,
+        method: "PUT",
+        body: {
+            content: name,
+        },
+    });
+
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
+    return res.data;
+};
+
+export const deleteSession = async (sessionId: string) => {
+    const res = await request({
+        endpoint: `sessions/${sessionId}`,
+        method: "DELETE",
+    });
+
+    if (res.error) {
+        throw new Error(res.error)
+    }
+
+    return res.data;
+};
+
+export const sendQuery = async ({
+    sessionId,
+    query,
+}: {
+    sessionId: string | undefined;
+    query: string;
+}) => {
+    if (!query) {
+        return;
+    }
+
+    const res = await request<ChatResponse>({
+        endpoint: sessionId ? `chat/ask/${sessionId}` : "chat/ask",
+        method: "POST",
+        body: {
+            content: query,
+        },
+    });
+
+    if (res.error)
+        throw new Error(res.error)
+
+    const data = res.data;
+
+    return data;
+};
