@@ -6,7 +6,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import MemorySaver
+# from langgraph.checkpoint.memory import MemorySaver
 
 from src.helpers import download_embedding_model
 from src.prompts import *
@@ -21,6 +21,7 @@ load_dotenv()
 langchain_embeddings, raw_model = download_embedding_model()
 index_name = "medical-chatbot"
 
+MODEL = "gemini-2.5-flash"
 
 # Load Existing Index
 
@@ -32,9 +33,9 @@ doc_store = PineconeVectorStore.from_existing_index(
 retriever = doc_store.as_retriever(
     search_type="similarity", search_kwargs={"k": 3})
 
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
+llm = ChatGoogleGenerativeAI(model=MODEL)
 
-memory_saver = MemorySaver()
+# memory_saver = MemorySaver()
 
 # Initialize agents
 retrieval_agent = RetrievalAgent(retriever, raw_model)
@@ -44,7 +45,8 @@ synthesis_agent = SynthesisAgent(llm)
 
 graph_builder = StateGraph(AgentState)
 
-config = {"configurable": {"thread_id": UUID(int=0)}}
+# config = {"configurable": {"thread_id": UUID(int=0)}}
+config = {}
 
 # Update graph with new nodes
 graph_builder.add_node("retrieve", retrieval_agent.run)
@@ -84,4 +86,4 @@ graph_builder.add_edge("retrieve", "synthesize")
 graph_builder.add_edge("web_search", "synthesize")
 graph_builder.add_edge("synthesize", END)
 
-graph = graph_builder.compile(checkpointer=memory_saver)
+graph = graph_builder.compile()

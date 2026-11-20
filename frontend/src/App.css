@@ -1,0 +1,37 @@
+.hoverable {
+    cursor: pointer;
+}
+
+.hoverable:hover {
+    background-color: #ffffff1a;
+}
+
+.focused {
+    background-color: #ffffff1a;
+}
+
+.markdown *:not(:first-child) {
+    margin-top: 12px;
+}
+
+.markdown ol > li {
+    list-style-type: decimal;
+    list-style-position: inside;
+    padding-left: 12px;
+}
+
+.markdown ul > li {
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+}
+
+.markdown ul {
+    list-style-type: disc;
+    list-style-position: inside;
+    padding-left: 12px;
+}
+
+.markdown li p {
+    display: inline;
+    margin-left: 4px;
+}

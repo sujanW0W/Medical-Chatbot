@@ -1,170 +1,181 @@
-# Medical Chatbot using Multi-Agentic Retrieval Augmented Generation (RAG) 🤖🩺
+# Medical Chatbot
 
-A sophisticated medical chatbot that provides accurate medical information through a multi-agentic RAG system. This project implements a multi-agentic paradigm orchestrated by an LLM-powered agent to intelligently process user queries, retrieve relevant information from a medical knowledge base, perform real-time web searches when necessary, and synthesize a coherent, medically relevant response.
+A production-oriented, RAG-powered medical chatbot built as a containerized monorepo of microservices. A multi-agent pipeline (retrieval + live web search + synthesis) answers medical questions grounded in real medical literature, processed asynchronously behind a message queue so the API never blocks on the LLM.
 
-![Architecture](/assets/Architecture.png)
+![Chatbot Interface](assets/Result.png)
 
-### 🔄 System Workflow
+> This project started as a single-script Streamlit prototype for a class project and is being rebuilt into a production-grade application — this README documents the first milestone of that rebuild: a working, containerized, async, multi-service architecture with session management.
 
-The system’s workflow is non-deterministic and adapts dynamically to the complexity and nature of user queries. The key steps involved are:
+## Overview
 
-1.  **Query Submission:** Users submit their medical queries through the interactive Streamlit-based web interface.
-2.  **Orchestration:** The Orchestrator Agent, powered by an LLM, analyzes the submitted query to understand its intent and complexity. Based on this analysis, it intelligently selects the appropriate subsequent agents (e.g., Retrieval Agent for knowledge base queries, Web Search Agent for current or external information).
-3.  **Information Retrieval:** The invoked agents execute their specific tasks. The Retrieval Agent searches the Pinecone vector database for relevant medical documents, while the Web Search Agent performs real-time searches using DuckDuckGo for information not present in the knowledge base.
-4.  **Context Synthesis:** The Synthesis Agent receives the original query, along with any retrieved documents from the knowledge base and results from web searches. It consolidates and structures this diverse information into a coherent context, preparing it for the final response generation.
-5.  **Response Generation:** The structured context is passed to the Google Gemini 1.5 Flash LLM. The LLM uses this augmented information to generate a final, accurate, and medically relevant response, which is then displayed back to the user in the Streamlit interface.
+- Ask a medical question → the backend enqueues the work and returns instantly with a job id.
+- A Celery worker picks up the job, runs a **LangGraph** multi-agent pipeline that decides whether to search the internal medical knowledge base (Pinecone), the live web (DuckDuckGo), or both, then synthesizes an answer with **Google Gemini**.
+- The result is written back to Postgres and picked up by the frontend, which polls for new messages.
+- Conversations are grouped into sessions you can rename or delete from the sidebar.
 
-## 💡 Features
+## Architecture
 
--   **Multi-Agent Architecture:** Utilizes specialized agents for distinct tasks (retrieval, web search, synthesis) orchestrated by another LLM-powered agent.
--   **Retrieval Augmented Generation (RAG):** Combines retrieval from the knowledge base and web search results with the LLM's capabilities to generate informed responses.
--   **Medical Knowledge Base:** Integrates with a Pinecone vector store populated with medical documents for domain-specific information retrieval.
--   **Real-time Web Search:** Incorporates DuckDuckGo Search for accessing up-to-date information beyond the internal knowledge base.
--   **Advanced Language Model:** Powered by Google's Gemini 1.5 Flash for natural language understanding, generation, and synthesis.
--   **Interactive Interface:** Provides a user-friendly web interface built with Streamlit.
+The system is a set of independently deployable services, all defined in one repo (`infra/compose.yml`) and fronted by Nginx:
 
-## 🛠️ Technology Stack
+```mermaid
+flowchart LR
+    U[Browser] --> N[nginx]
+    N -->|/| F[frontend<br/>React + Vite]
+    N -->|/backend/| A[api<br/>FastAPI]
+    N -->|/flower/| FL[flower<br/>Celery monitor]
+    N -->|/rabbitmq/| MQ[RabbitMQ]
 
-| Component       | Technology                           |
-| --------------- | ------------------------------------ |
-| Language Model  | Google Gemini 1.5 Flash              |
-| Vector Database | Pinecone                             |
-| Embedding Model | `all-MiniLM-L6-v2` (via HuggingFace) |
-| Web Search      | DuckDuckGo API                       |
-| Orchestration   | LangChain + LangGraph                |
-| UI              | Streamlit                            |
-
-## ✅ Prerequisites
-
--   Python 3.9+
--   Pinecone API key
--   Google AI Studio API key
--   DuckDuckGo API access
--   LangChain & LangGraph
-
-## ⚙️ Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/sujanW0W/Medical-Chatbot
-cd medical-chatbot
+    F -->|REST| A
+    A -->|reads/writes| DB[(Postgres)]
+    A -->|enqueue job| MQ
+    MQ --> W[llm-worker<br/>Celery]
+    W -->|status + result callback| A
+    W --> PC[(Pinecone<br/>vector store)]
+    W --> WEB[(DuckDuckGo<br/>web search)]
+    W --> LLM[(Google Gemini)]
 ```
 
-2. Create and activate virtual environment:
+**Request flow:** the frontend posts a message to the API, which persists it, creates a `Job` row (`queued`), and hands it to Celery over RabbitMQ — responding immediately with the `job_id`. The `llm-worker` service consumes the job, marks it `processing`, runs the agent graph below, then calls back into the API to persist the assistant's reply and flip the job to `success`/`failed`. The frontend has no direct line to the worker; it only ever talks to the API and finds out about new messages by polling.
 
-```bash
-python -m venv venv
-.\venv\Scripts\activate
+**Multi-agent RAG pipeline** (inside `llm-worker`, orchestrated with LangGraph):
+
+![Architecture](assets/Architecture.png)
+
+1. **Router** — an LLM call classifies the query as needing the knowledge base or a live web search.
+2. **Retrieval Agent** — searches a Pinecone index built from *Encyclopedia of Medicine* (chunked, embedded with `sentence-transformers/all-MiniLM-L6-v2`) and scores relevance.
+3. **Web Search Agent** — falls back to DuckDuckGo for queries outside the knowledge base.
+4. **Synthesis Agent** — merges whatever context was retrieved and calls Gemini 2.5 Flash to produce the final answer.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite, TypeScript, TanStack Query, Tailwind CSS, Radix/shadcn components |
+| Backend API | FastAPI, SQLAlchemy, Alembic, PostgreSQL, Celery (producer) |
+| LLM Worker | Celery, LangGraph, LangChain, Google Gemini 2.5 Flash, Pinecone, HuggingFace sentence-transformers, DuckDuckGo Search |
+| Infra | Docker Compose, Nginx, RabbitMQ, Flower |
+
+## Project Structure
+
+```
+Medical-Chatbot/
+├── frontend/            # React SPA (chat UI, sessions sidebar)
+├── services/
+│   ├── api/              # FastAPI backend — sessions, chat, jobs
+│   └── llm-worker/       # Celery worker — multi-agent RAG pipeline
+├── infra/                # docker-compose.yml, nginx.conf, rabbitmq.conf
+├── data/                 # source medical literature (PDF) for the knowledge base
+├── docs/                 # architecture diagrams, methodology notes
+├── dev.sh                # local dev entrypoint (wraps docker compose)
+└── .env                  # shared secrets/config (not committed)
 ```
 
-3. Install required packages:
+## Getting Started
 
-```bash
-pip install -r requirements.txt
-```
+### Prerequisites
 
-4. Create a `.env` file in the project root:
+- Docker and Docker Compose
+- A [Pinecone](https://www.pinecone.io/) API key
+- A [Google AI Studio](https://aistudio.google.com/) API key (Gemini)
+
+### Environment variables
+
+Create a `.env` in the repo root:
 
 ```env
-PINECONE_API_KEY=your_pinecone_api_key
-GOOGLE_API_KEY=your_google_api_key
+PINECONE_API_KEY=
+GOOGLE_API_KEY=
+
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+
+BROKER_URL=amqp://<rabbitmq_user>:<rabbitmq_pass>@rabbitmq:5672//
+BACKEND_URL=http://api:8000/api/v1
+
+RABBITMQ_DEFAULT_USER=
+RABBITMQ_DEFAULT_PASS=
 ```
 
-## 📁 Project Structure
+And a `frontend/.env`:
 
-```
-medical-chatbot/
-├── assets/
-├── data/
-├── src/
-│   ├── agents/
-│   │   ├── __init__.py
-│   │   ├── base.py
-│   │   ├── retrieval.py
-│   │   ├── synthesis.py
-│   │   ├── web_search.py
-│   │   └── state.py
-│   ├── __init__.py
-│   ├── helpers.py
-│   ├── orchestrator.py
-│   └── prompts.py
-├── app.py
-├── requirements.txt
-├── setup.py
-├── store_index.py
-├── template.py
-├── start.sh
-└── README.md
+```env
+VITE_BASE_URL="http://127.0.0.1/backend/api/v1"
 ```
 
-## 🚀 Usage
+### Running
 
-1.  **Populate the Pinecone index:** Before running the application for the first time, you need to process the medical documents (extraction, chunking, and embeddings) and upload them to your Pinecone index.
+`dev.sh` wraps Docker Compose so you don't have to remember flags or paths:
 
-    ```bash
-    python store_index.py
-    ```
+```bash
+./dev.sh up      # build + start everything, logs attached
+./dev.sh upd     # same, detached
+./dev.sh logs    # tail logs (optionally: ./dev.sh logs llm-worker)
+./dev.sh ps      # service status
+./dev.sh down    # stop everything
+```
 
-    _Ensure your Pinecone environment and index name are correctly configured in `store_index.py` and your `.env` file._
+Once running, everything is served through Nginx on port 80:
 
-2.  **Start the Streamlit application:**
+| URL | Service |
+|---|---|
+| `http://localhost/` | Frontend |
+| `http://localhost/backend/api/v1/` | Backend API |
+| `http://localhost/flower/` | Celery task monitor |
+| `http://localhost/rabbitmq/` | RabbitMQ management UI |
 
-    ```bash
-    streamlit run app.py
-    ```
+Code changes are picked up live for `api` (uvicorn `--reload`) and `frontend` (Vite HMR) thanks to bind-mounted volumes. `llm-worker` does **not** auto-reload — restart it after changing agent/orchestrator code:
 
-    Alternatively, you can use the provided start script:
+```bash
+./dev.sh restart llm-worker
+```
 
-    ```bash
-    ./start.sh
-    ```
+### Populating the knowledge base
 
-3.  **Open your web browser and navigate to:**
+Before asking questions for the first time, build the Pinecone index from the medical PDFs in `data/`:
 
-    ```
-    http://localhost:8501
-    ```
+```bash
+./dev.sh sh llm-worker
+python store_index.py
+```
 
-4.  **Start chatting with the medical bot!**
+This only needs to be run once (or again if you change the source documents).
 
-## 📊 Result
+## API Reference
 
-The system was tested with 20 diverse medical queries related to diseases, diagnosis, and drugs.
+All routes are prefixed with `/api/v1`.
 
--   🕒 **Avg. Response Time**: 3.7 seconds
--   ✅ **Query Success Rate**: 94.8%
--   💡 **System Strengths**:
-    -   Handles real-time, up-to-date questions
-    -   Maintains conversational context
-    -   Generates informative, non-hallucinated answers
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/sessions/` | List all sessions |
+| `GET` | `/sessions/{id}/conversations` | List messages in a session |
+| `PUT` | `/sessions/{id}/rename` | Rename a session |
+| `DELETE` | `/sessions/{id}` | Delete a session |
+| `POST` | `/chat/ask` | Start a new session with a message → returns `job_id` |
+| `POST` | `/chat/ask/{session_id}` | Send a message in an existing session → returns `job_id` |
+| `GET` | `/jobs/{job_id}` | Get a job's status/result |
+| `PATCH` | `/jobs/job-status-change/{job_id}/{status}` | *Internal* — used by `llm-worker` to update job status |
+| `POST` | `/jobs/add-conversation/{session_id}/{job_id}/{status}` | *Internal* — used by `llm-worker` to write back the result |
 
-## 🖼️ Preview
+## Roadmap / Known Limitations
 
-Here is a screenshot of the chatbot interface:
+This milestone covers the async pipeline end-to-end (submit → queue → multi-agent processing → callback → poll) plus session management. Deliberately out of scope for now, planned next:
 
-![Chatbot Interface](/assets/Result.png)
+- **Job status in the UI** — the frontend currently only polls for new messages; it doesn't yet show a "thinking…" state while a job is `processing`, or surface a distinct error state when a job `fails` (this needs backend support — e.g. exposing job status per session — before the UI work makes sense).
+- **WebSockets** — polling is a deliberate first step; the plan is to replace it with a push-based update once the job-status work above lands.
+- **Automated tests / CI** — none yet.
+- **Production Dockerfiles** — current images are dev-oriented (bind mounts, hot reload); no hardened/multi-stage prod build yet.
 
-## 📜 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE).
 
-## 🙏 Acknowledgments
+## Contributors
 
--   LangChain for providing the framework components.
--   Google for the powerful Gemini language model.
--   Pinecone for the efficient vector storage solution.
--   DuckDuckGo Search for the web search capabilities.
--   Streamlit for enabling rapid development of the web interface.
+- [@sujanW0W](https://github.com/sujanW0W)
 
-## 👨‍💻 Collaborators
+## Contact
 
-[@sujanW0W](https://github.com/sujanW0W)
-
-[@Akatzz12](https://github.com/Akatzz12)
-
-[@Aayush-lamsal](https://github.com/aayush-lamsal)
-
-## 📧 Contact
-
-Email: [Sujan Maharjan](mailto:sujan.maharjan.1@ndsu.edu)
+Sujan Maharjan — [sujan.maharjan.1@ndsu.edu](mailto:sujan.maharjan.1@ndsu.edu)
