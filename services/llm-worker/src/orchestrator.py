@@ -3,12 +3,13 @@ from dotenv import load_dotenv
 from uuid import UUID
 
 from langchain_pinecone import PineconeVectorStore
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from langgraph.graph import StateGraph, START, END
 # from langgraph.checkpoint.memory import MemorySaver
 
 from src.helpers import download_embedding_model
+from src.llm_provider import get_chat_model
+from src.llm_utils import strip_reasoning
 from src.prompts import *
 
 from src.agents.state import AgentState
@@ -21,8 +22,6 @@ load_dotenv()
 langchain_embeddings, raw_model = download_embedding_model()
 index_name = "medical-chatbot"
 
-MODEL = "gemini-2.5-flash"
-
 # Load Existing Index
 
 doc_store = PineconeVectorStore.from_existing_index(
@@ -33,7 +32,7 @@ doc_store = PineconeVectorStore.from_existing_index(
 retriever = doc_store.as_retriever(
     search_type="similarity", search_kwargs={"k": 3})
 
-llm = ChatGoogleGenerativeAI(model=MODEL)
+llm = get_chat_model()
 
 # memory_saver = MemorySaver()
 
@@ -61,14 +60,22 @@ def route_tools(state: AgentState):
     query = state["messages"][-1].content
     # Let LLM decide which tool to use
     messages = [
-        {"role": "system", "content": "Decide which tool to use: 'retrieve', 'web_search'"},
+        {"role": "system", "content": (
+            "Decide which tool should answer the user's medical question:\n"
+            "- 'retrieve': stable, general medical knowledge - conditions, "
+            "symptoms, causes, physiology, standard treatments.\n"
+            "- 'web_search': anything time-sensitive - the latest/current/newest "
+            "drug approvals, guidelines, recalls, research, or outbreaks, or a "
+            "question using words like 'latest', 'current', 'recent', 'this year'.\n"
+            "Respond with exactly one word: retrieve or web_search."
+        )},
         {"role": "user", "content": query},
     ]
 
     response = llm.invoke(messages)
-    tool_choice = response.content.lower().strip()
+    tool_choice = strip_reasoning(response.content).lower()
 
-    if tool_choice == "web_search":
+    if "web_search" in tool_choice:
         return "web_search"
     # elif tool_choice == "both":
     #     return ["retrieve", "web_search"]

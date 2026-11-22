@@ -1,6 +1,7 @@
 from langchain.chat_models.base import BaseChatModel
 from .base import BaseAgent
 from .state import AgentState
+from src.llm_utils import strip_reasoning
 from src.prompts import system_prompt
 
 
@@ -62,7 +63,7 @@ class SynthesisAgent(BaseAgent):
 
         ai_message = {
             "role": "assistant",
-            "content": response.content
+            "content": strip_reasoning(response.content)
         }
 
         return {"messages": [*state["messages"], ai_message]}

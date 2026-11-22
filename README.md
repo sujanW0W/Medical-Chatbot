@@ -84,7 +84,18 @@ Create a `.env` in the repo root:
 
 ```env
 PINECONE_API_KEY=
-GOOGLE_API_KEY=
+
+# Optional — selects the chat model backend (services/llm-worker/src/llm_provider.py).
+# Defaults to google if unset. "openai" works with any OpenAI-compatible
+# endpoint, including a self-hosted vLLM server — useful for local dev/eval. 
+# Production should use billed provider.
+# LLM_PROVIDER=google
+# GOOGLE_MODEL=gemini-2.5-flash
+# GOOGLE_API_KEY=
+# LLM_PROVIDER=openai
+# OPENAI_BASE_URL=http://<vllm-host>:<port>/v1
+# OPENAI_MODEL=<model id vLLM was launched with>
+# OPENAI_API_KEY=not-needed
 
 POSTGRES_HOST=db
 POSTGRES_PORT=5432
@@ -142,6 +153,36 @@ python store_index.py
 ```
 
 This only needs to be run once (or again if you change the source documents).
+
+### Evaluating the RAG pipeline
+
+`services/llm-worker/eval/` is a small evaluation harness that runs a fixed
+set of 20 golden queries (`golden_queries.json`, labeled with the expected
+routing decision — `retrieve` vs. `web_search`) through the real pipeline
+and scores:
+
+- **Router accuracy** — did it pick the right tool for the query?
+- **Retrieval relevance** — the cosine-similarity score `RetrievalAgent`
+  already computes per-query, aggregated here.
+- **Answer quality** — a reference-free LLM-judge rating faithfulness
+  (grounded in the retrieved/web context, no fabrication) and relevance,
+  1–5 each.
+- **Latency** — wall-clock time per query.
+
+Run it from inside the `llm-worker` container (same deps/env vars as the
+pipeline itself — no new dependencies needed):
+
+```bash
+./dev.sh sh llm-worker
+python eval/run_eval.py                      # overwrites eval-report.md / results.json
+python eval/run_eval.py --label baseline     # keeps this run as eval-report-baseline.md / results-baseline.json
+```
+
+Use `--label` for any run you want to preserve for a before/after
+comparison (e.g. after tuning the system prompt) instead of letting the
+next run overwrite it — each labeled `results-*.json` also records the
+exact `system_prompt` text that produced it, so a later comparison doesn't
+need to cross-reference git history.
 
 ## API Reference
 

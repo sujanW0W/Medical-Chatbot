@@ -1,0 +1,22 @@
+[
+    {"id": "diabetes-t2-symptoms", "query": "What are the common symptoms of type 2 diabetes?", "expected_route": "retrieve"},
+    {"id": "pancreas-function", "query": "What is the function of the pancreas in the human body?", "expected_route": "retrieve"},
+    {"id": "pneumonia-causes-treatment", "query": "What causes pneumonia and how is it typically treated?", "expected_route": "retrieve"},
+    {"id": "ckd-stages", "query": "What are the stages of chronic kidney disease?", "expected_route": "retrieve"},
+    {"id": "virus-vs-bacteria", "query": "What is the difference between a virus and a bacterium?", "expected_route": "retrieve"},
+    {"id": "hypothyroidism-symptoms", "query": "What are the common symptoms of hypothyroidism?", "expected_route": "retrieve"},
+    {"id": "immune-response-basics", "query": "How does the human immune system respond to an infection?", "expected_route": "retrieve"},
+    {"id": "cad-risk-factors", "query": "What are the risk factors for coronary artery disease?", "expected_route": "retrieve"},
+    {"id": "insulin-function", "query": "What is the function of insulin in blood sugar regulation?", "expected_route": "retrieve"},
+    {"id": "appendicitis-symptoms-treatment", "query": "What are the typical symptoms and treatment of appendicitis?", "expected_route": "retrieve"},
+    {"id": "migraine-causes-treatment", "query": "What causes migraines and what are common treatments?", "expected_route": "retrieve"},
+    {"id": "diabetes-type1-vs-type2", "query": "What is the difference between type 1 and type 2 diabetes?", "expected_route": "retrieve"},
+    {"id": "alzheimers-latest-fda-drug", "query": "What is the latest FDA-approved drug for Alzheimer's disease this year?", "expected_route": "web_search"},
+    {"id": "cdc-flu-vaccine-current", "query": "What are the current CDC guidelines for this year's flu vaccine?", "expected_route": "web_search"},
+    {"id": "who-mpox-latest-guidance", "query": "What is the most recent WHO guidance on mpox outbreaks?", "expected_route": "web_search"},
+    {"id": "weight-loss-drugs-newest", "query": "What are the newest weight-loss medications approved this year?", "expected_route": "web_search"},
+    {"id": "covid-booster-current-schedule", "query": "What is the current recommended COVID-19 booster schedule?", "expected_route": "web_search"},
+    {"id": "bp-medication-recalls-recent", "query": "Are there any recent recalls of blood pressure medications?", "expected_route": "web_search"},
+    {"id": "glp1-latest-research", "query": "What is the latest research on GLP-1 drugs for diabetes treatment?", "expected_route": "web_search"},
+    {"id": "usda-dietary-guidelines-current", "query": "What are this year's updated dietary guidelines from the USDA?", "expected_route": "web_search"}
+]
