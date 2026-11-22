@@ -13,21 +13,17 @@ BACKEND_URL = os.getenv("BACKEND_URL")
 def invoke_llm(job_id, session_id, msg):
     logger.info("job %s: received, session=%s", job_id, session_id)
     try:
-        requests.patch(
-            f"{BACKEND_URL}/jobs/job-status-change/{job_id}/PROCESSING"
-        )
+        requests.patch(f"{BACKEND_URL}/jobs/job-status-change/{job_id}/PROCESSING")
 
-        response = graph.invoke({
-            "messages": msg
-        })
+        response = graph.invoke({"messages": msg})
 
         logger.info("job %s: succeeded", job_id)
         requests.post(
             f"{BACKEND_URL}/jobs/{job_id}/success",
             json={
                 "session_id": session_id,
-                "content": response["messages"][-1].content
-            }
+                "content": response["messages"][-1].content,
+            },
         )
 
     except Exception:
@@ -36,6 +32,6 @@ def invoke_llm(job_id, session_id, msg):
             f"{BACKEND_URL}/jobs/{job_id}/failure",
             json={
                 "session_id": session_id,
-                "content": "⚠️ Something went wrong while generating a response. Please try again."
-            }
+                "content": "⚠️ Something went wrong while generating a response. Please try again.",
+            },
         )

@@ -6,6 +6,6 @@ system_prompt = (
     "If the context is empty, appears to be an error, or does not actually "
     "contain enough information to answer the question, say so plainly "
     "(e.g. \"I don't have reliable information on this in my current "
-    "sources.\") instead of guessing or answering from general knowledge.\n\n"
+    'sources.") instead of guessing or answering from general knowledge.\n\n'
     "Context:\n{context}"
 )

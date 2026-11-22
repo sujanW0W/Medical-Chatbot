@@ -18,58 +18,42 @@ def get_job(job_id: str):
 
     job_data = JobSchema.model_validate(job).model_dump(mode="json")
 
-    return project_return(
-        status_code=status.HTTP_200_OK,
-        data=job_data
-    )
+    return project_return(status_code=status.HTTP_200_OK, data=job_data)
 
 
-@router.patch('/job-status-change/{job_id}/{job_status}')
-def update_status(job_id: str, job_status: Literal["PROCESSING"] | Literal["CANCELLED"]):
-    update_job_status(
-        job_id=job_id,
-        job_status=job_status
-    )
+@router.patch("/job-status-change/{job_id}/{job_status}")
+def update_status(
+    job_id: str, job_status: Literal["PROCESSING"] | Literal["CANCELLED"]
+):
+    update_job_status(job_id=job_id, job_status=job_status)
 
     return project_return(
         status_code=status.HTTP_200_OK,
-        data={
-            "message": "Job status updated successfully."
-        }
+        data={"message": "Job status updated successfully."},
     )
 
 
-@router.post('/{job_id}/success')
+@router.post("/{job_id}/success")
 def job_success(job_id: str, body: JobCompletionReport):
-    ai_msg: Message = {
-        "role": "assistant",
-        "content": body.content
-    }
+    ai_msg: Message = {"role": "assistant", "content": body.content}
 
     convo = add_conversation(body.session_id, ai_msg)
     update_job_success(job_id, convo.id)
 
     return project_return(
         status_code=status.HTTP_200_OK,
-        data={
-            "message": "Conversation inserted and job marked successful."
-        }
+        data={"message": "Conversation inserted and job marked successful."},
     )
 
 
-@router.post('/{job_id}/failure')
+@router.post("/{job_id}/failure")
 def job_failure(job_id: str, body: JobCompletionReport):
-    ai_msg: Message = {
-        "role": "assistant",
-        "content": body.content
-    }
+    ai_msg: Message = {"role": "assistant", "content": body.content}
 
     convo = add_conversation(body.session_id, ai_msg)
     update_job_failure(job_id, convo.id)
 
     return project_return(
         status_code=status.HTTP_200_OK,
-        data={
-            "message": "Conversation inserted and job marked failed."
-        }
+        data={"message": "Conversation inserted and job marked failed."},
     )

@@ -16,6 +16,7 @@ self-hosted vLLM server to sidestep Gemini's free-tier quota) - production
 is expected to run LLM_PROVIDER=google with billing enabled, or another
 billed provider added the same way later.
 """
+
 import os
 
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -46,4 +47,5 @@ def get_chat_model() -> BaseChatModel:
         return ChatGoogleGenerativeAI(model=model)
 
     raise ValueError(
-        f"Unknown LLM_PROVIDER: {provider!r} (expected 'google' or 'openai')")
+        f"Unknown LLM_PROVIDER: {provider!r} (expected 'google' or 'openai')"
+    )

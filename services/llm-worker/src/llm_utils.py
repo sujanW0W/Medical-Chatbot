@@ -2,6 +2,7 @@
 Shared helpers for dealing with raw chat-model output, independent of which
 provider produced it (src/llm_provider.py).
 """
+
 import re
 
 _THINK_BLOCK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)

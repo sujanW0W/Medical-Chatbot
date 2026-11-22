@@ -19,15 +19,13 @@ class RetrievalAgent(BaseAgent):
 
         # Encode query and documents
         query_embedding = self.model.encode(query)
-        doc_embeddings = self.model.encode(
-            [doc.page_content for doc in docs])
+        doc_embeddings = self.model.encode([doc.page_content for doc in docs])
 
         # Calculate cosine similarity between query and each document
         similarities = util.cos_sim(query_embedding, doc_embeddings)[0]
 
         # Average the top 3 similarity scores
-        top_k_similarities = torch.topk(
-            similarities, k=min(3, len(similarities)))
+        top_k_similarities = torch.topk(similarities, k=min(3, len(similarities)))
         avg_similarity = float(torch.mean(top_k_similarities.values))
 
         return avg_similarity
@@ -45,5 +43,5 @@ class RetrievalAgent(BaseAgent):
             "messages": state["messages"],
             "retrieved_docs": docs,
             "relevance_score": relevance_score,
-            "last_tool": "retriever"
+            "last_tool": "retriever",
         }

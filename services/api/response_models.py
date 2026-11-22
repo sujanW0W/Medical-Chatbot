@@ -4,7 +4,7 @@ from models.jobs import JobStatus
 from datetime import datetime
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ProjectReturn(BaseModel, Generic[T]):
