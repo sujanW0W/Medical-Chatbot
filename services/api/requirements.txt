@@ -23,5 +23,6 @@ alembic
 psycopg2-binary
 celery
 flower
+slowapi
 
 # -e .
