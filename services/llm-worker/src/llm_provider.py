@@ -42,7 +42,7 @@ def get_chat_model() -> BaseChatModel:
         )
 
     if provider == "google":
-        model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        model = os.getenv("GOOGLE_MODEL", "gemini-2.5-flash")
         return ChatGoogleGenerativeAI(model=model)
 
     raise ValueError(

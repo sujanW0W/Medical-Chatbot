@@ -47,7 +47,7 @@ JUDGE_SYSTEM_PROMPT = (
 )
 
 
-def build_context_summary(result: dict, max_chars_per_item: int = 500) -> str:
+def build_context_summary(result: dict) -> str:
     """Render whatever context the pipeline actually used, for the judge to see."""
     parts = []
 
@@ -55,12 +55,12 @@ def build_context_summary(result: dict, max_chars_per_item: int = 500) -> str:
     if retrieved_docs:
         for i, doc in enumerate(retrieved_docs, start=1):
             parts.append(
-                f"[KB doc {i}] {doc.page_content[:max_chars_per_item]}")
+                f"[KB doc {i}] {doc.page_content}")
 
     web_results = result.get("web_results")
     if web_results:
         for i, r in enumerate(web_results, start=1):
-            snippet = r.get("snippet", "")[:max_chars_per_item]
+            snippet = r.get("snippet", "")
             parts.append(f"[Web result {i}] {r.get('title', '')}: {snippet}")
 
     return "\n\n".join(parts) if parts else "(no context retrieved)"
@@ -83,9 +83,11 @@ def judge_response(query: str, context: str, answer: str) -> dict:
 
     try:
         parsed = json.loads(raw)
+        faithfulness = parsed.get("faithfulness")
+        answer_relevance = parsed.get("answer_relevance")
         return {
-            "faithfulness": parsed.get("faithfulness"),
-            "answer_relevance": parsed.get("answer_relevance"),
+            "faithfulness": faithfulness if type(faithfulness) is int and 1 <= faithfulness <= 5 else None,
+            "answer_relevance": answer_relevance if type(answer_relevance) is int and 1 <= answer_relevance <= 5 else None,
             "rationale": parsed.get("rationale"),
         }
     except (json.JSONDecodeError, AttributeError):
@@ -217,8 +219,6 @@ def write_markdown_report(aggregates: dict, records: list, report_path: str, lab
         ans_rel = r["judge_answer_relevance"] if r["judge_answer_relevance"] is not None else "—"
         latency = r["latency_seconds"] if r["latency_seconds"] is not None else "—"
         notes = str(r["error"] or r.get("judge_rationale") or "")
-        if len(notes) > 180:
-            notes = notes[:180] + "…"
 
         query_cell = r["query"].replace("|", "\\|")
         notes_cell = notes.replace("|", "\\|")
