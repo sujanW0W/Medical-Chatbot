@@ -7,6 +7,7 @@ python-dotenv
 pinecone-client
 langchain-community
 langchain-google-genai
+langchain-openai
 langchain-experimental
 langchain-huggingface
 langchain-pinecone
