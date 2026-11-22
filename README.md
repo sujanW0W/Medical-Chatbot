@@ -143,6 +143,24 @@ Code changes are picked up live for `api` (uvicorn `--reload`) and `frontend` (V
 ./dev.sh restart llm-worker
 ```
 
+### Pre-push checks (lint)
+
+`.github/workflows/ci.yml` lints `api`/`llm-worker` (ruff) and the frontend
+(eslint + typecheck + build) on every PR. A [pre-commit](https://pre-commit.com/)
+hook mirrors the same checks locally at `git push` time, so failures surface
+before CI does. One-time setup per clone:
+
+```bash
+pip install pre-commit
+pre-commit install --hook-type pre-push
+```
+
+From then on it runs automatically on `git push`. To run it manually:
+
+```bash
+pre-commit run --hook-stage pre-push --all-files
+```
+
 ### Populating the knowledge base
 
 Before asking questions for the first time, build the Pinecone index from the medical PDFs in `data/`:

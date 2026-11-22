@@ -22,16 +22,11 @@ pc.create_index(
     name=index_name,
     dimension=dimension_of_vector,
     metric="cosine",
-    spec=ServerlessSpec(
-        cloud="aws",
-        region="us-east-1"
-    )
+    spec=ServerlessSpec(cloud="aws", region="us-east-1"),
 )
 
 # Embed and upsert the embeddings into the Pinecone Index
 
 doc_store = PineconeVectorStore.from_documents(
-    index_name=index_name,
-    embedding=embedding_model,
-    documents=text_chunks
+    index_name=index_name, embedding=embedding_model, documents=text_chunks
 )

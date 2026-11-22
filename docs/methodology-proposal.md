@@ -123,9 +123,9 @@ I'll break down each component and explain its significance in the medical chatb
     -   Fast retrieval of relevant information
 -   **Configuration**:
     ```python
-    dimension=384
-    metric="cosine"
-    spec=ServerlessSpec(cloud="aws", region="us-east-1")
+    dimension = 384
+    metric = "cosine"
+    spec = ServerlessSpec(cloud="aws", region="us-east-1")
     ```
 -   **Role**: Acts as the knowledge base for the chatbot
 
@@ -136,10 +136,7 @@ I'll break down each component and explain its significance in the medical chatb
 -   **Purpose**: Finds relevant documents for user queries
 -   **Configuration**:
     ```python
-    retriever = doc_store.as_retriever(
-        search_type="similarity",
-        search_kwargs={"k": 3}
-    )
+    retriever = doc_store.as_retriever(search_type="similarity", search_kwargs={"k": 3})
     ```
 -   **Significance**:
     -   Returns top 3 most relevant chunks

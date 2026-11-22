@@ -1,6 +1,4 @@
-from typing import List, Dict, Any
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
-from langchain_core.tools import Tool
 from .base import BaseAgent
 from .state import AgentState
 
@@ -17,25 +15,26 @@ class WebSearchAgent(BaseAgent):
             results = self.search_engine.results(query, num_results)
 
             if not results:
-                return [{
-                    "title": "No Results",
-                    "snippet": "No relevant web results found.",
-                    "link": ""
-                }]
+                return [
+                    {
+                        "title": "No Results",
+                        "snippet": "No relevant web results found.",
+                        "link": "",
+                    }
+                ]
 
-            return [{
-                "title": result["title"],
-                "snippet": result["snippet"],
-                "link": result["link"]
-            } for result in results]
+            return [
+                {
+                    "title": result["title"],
+                    "snippet": result["snippet"],
+                    "link": result["link"],
+                }
+                for result in results
+            ]
 
         except Exception as e:
             print(f"Error during web search: {e}")
-            return [{
-                "title": "Error",
-                "snippet": str(e),
-                "link": ""
-            }]
+            return [{"title": "Error", "snippet": str(e), "link": ""}]
 
     def run(self, state: AgentState):
         """Run the web search agent."""

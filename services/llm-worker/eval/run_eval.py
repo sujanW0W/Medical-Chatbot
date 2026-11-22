@@ -20,6 +20,7 @@ comparison (e.g. a prompt change) instead of letting the next run overwrite
 it. The current src/prompts.py system_prompt text is saved into the labeled
 results.json alongside the scores, so each labeled run is self-describing.
 """
+
 import argparse
 import json
 import os
@@ -54,8 +55,7 @@ def build_context_summary(result: dict) -> str:
     retrieved_docs = result.get("retrieved_docs")
     if retrieved_docs:
         for i, doc in enumerate(retrieved_docs, start=1):
-            parts.append(
-                f"[KB doc {i}] {doc.page_content}")
+            parts.append(f"[KB doc {i}] {doc.page_content}")
 
     web_results = result.get("web_results")
     if web_results:
@@ -86,8 +86,12 @@ def judge_response(query: str, context: str, answer: str) -> dict:
         faithfulness = parsed.get("faithfulness")
         answer_relevance = parsed.get("answer_relevance")
         return {
-            "faithfulness": faithfulness if type(faithfulness) is int and 1 <= faithfulness <= 5 else None,
-            "answer_relevance": answer_relevance if type(answer_relevance) is int and 1 <= answer_relevance <= 5 else None,
+            "faithfulness": faithfulness
+            if type(faithfulness) is int and 1 <= faithfulness <= 5
+            else None,
+            "answer_relevance": answer_relevance
+            if type(answer_relevance) is int and 1 <= answer_relevance <= 5
+            else None,
             "rationale": parsed.get("rationale"),
         }
     except (json.JSONDecodeError, AttributeError):
@@ -119,8 +123,7 @@ def run_single_query(item: dict) -> dict:
 
     start = time.time()
     try:
-        result = graph.invoke(
-            {"messages": [{"role": "user", "content": query}]})
+        result = graph.invoke({"messages": [{"role": "user", "content": query}]})
     except Exception as e:
         record["error"] = f"graph invocation failed: {e}"
         record["latency_seconds"] = round(time.time() - start, 2)
@@ -129,8 +132,9 @@ def run_single_query(item: dict) -> dict:
 
     # The retrieval agent sets last_tool="retriever" (not "retrieve") -
     # normalize here so golden_queries.json can stay human-readable.
-    actual_route = "retrieve" if result.get(
-        "last_tool") == "retriever" else "web_search"
+    actual_route = (
+        "retrieve" if result.get("last_tool") == "retriever" else "web_search"
+    )
     record["actual_route"] = actual_route
     record["route_correct"] = actual_route == expected_route
 
@@ -155,27 +159,51 @@ def run_single_query(item: dict) -> dict:
 def compute_aggregates(records: list) -> dict:
     total = len(records)
     route_judged = [r for r in records if r["route_correct"] is not None]
-    relevance_scores = [r["retrieval_relevance"]
-                        for r in records if r["retrieval_relevance"] is not None]
-    faithfulness_scores = [r["judge_faithfulness"] for r in records if isinstance(
-        r["judge_faithfulness"], (int, float))]
-    answer_relevance_scores = [r["judge_answer_relevance"] for r in records if isinstance(
-        r["judge_answer_relevance"], (int, float))]
-    latencies = [r["latency_seconds"]
-                 for r in records if r["latency_seconds"] is not None]
+    relevance_scores = [
+        r["retrieval_relevance"]
+        for r in records
+        if r["retrieval_relevance"] is not None
+    ]
+    faithfulness_scores = [
+        r["judge_faithfulness"]
+        for r in records
+        if isinstance(r["judge_faithfulness"], (int, float))
+    ]
+    answer_relevance_scores = [
+        r["judge_answer_relevance"]
+        for r in records
+        if isinstance(r["judge_answer_relevance"], (int, float))
+    ]
+    latencies = [
+        r["latency_seconds"] for r in records if r["latency_seconds"] is not None
+    ]
 
     return {
         "total_queries": total,
         "errors": sum(1 for r in records if r["error"] is not None),
-        "router_accuracy": round(sum(1 for r in route_judged if r["route_correct"]) / len(route_judged), 3) if route_judged else None,
-        "avg_retrieval_relevance": round(statistics.mean(relevance_scores), 3) if relevance_scores else None,
-        "avg_judge_faithfulness": round(statistics.mean(faithfulness_scores), 2) if faithfulness_scores else None,
-        "avg_judge_answer_relevance": round(statistics.mean(answer_relevance_scores), 2) if answer_relevance_scores else None,
-        "avg_latency_seconds": round(statistics.mean(latencies), 2) if latencies else None,
+        "router_accuracy": round(
+            sum(1 for r in route_judged if r["route_correct"]) / len(route_judged), 3
+        )
+        if route_judged
+        else None,
+        "avg_retrieval_relevance": round(statistics.mean(relevance_scores), 3)
+        if relevance_scores
+        else None,
+        "avg_judge_faithfulness": round(statistics.mean(faithfulness_scores), 2)
+        if faithfulness_scores
+        else None,
+        "avg_judge_answer_relevance": round(statistics.mean(answer_relevance_scores), 2)
+        if answer_relevance_scores
+        else None,
+        "avg_latency_seconds": round(statistics.mean(latencies), 2)
+        if latencies
+        else None,
     }
 
 
-def write_markdown_report(aggregates: dict, records: list, report_path: str, label: str | None = None) -> None:
+def write_markdown_report(
+    aggregates: dict, records: list, report_path: str, label: str | None = None
+) -> None:
     router_accuracy_display = (
         f"{aggregates['router_accuracy'] * 100:.1f}%"
         if aggregates["router_accuracy"] is not None
@@ -214,9 +242,17 @@ def write_markdown_report(aggregates: dict, records: list, report_path: str, lab
         else:
             match = "—"
 
-        retrieval_rel = f"{r['retrieval_relevance']:.2f}" if r["retrieval_relevance"] is not None else "—"
+        retrieval_rel = (
+            f"{r['retrieval_relevance']:.2f}"
+            if r["retrieval_relevance"] is not None
+            else "—"
+        )
         faith = r["judge_faithfulness"] if r["judge_faithfulness"] is not None else "—"
-        ans_rel = r["judge_answer_relevance"] if r["judge_answer_relevance"] is not None else "—"
+        ans_rel = (
+            r["judge_answer_relevance"]
+            if r["judge_answer_relevance"] is not None
+            else "—"
+        )
         latency = r["latency_seconds"] if r["latency_seconds"] is not None else "—"
         notes = str(r["error"] or r.get("judge_rationale") or "")
 
@@ -238,7 +274,7 @@ def parse_args():
         "--label",
         default=None,
         help="Optional label (e.g. 'baseline', 'after-prompt-tuning') to keep this "
-             "run's output files alongside others instead of overwriting them.",
+        "run's output files alongside others instead of overwriting them.",
     )
     return parser.parse_args()
 
@@ -260,13 +296,17 @@ def main():
     aggregates = compute_aggregates(records)
 
     with open(results_path, "w") as f:
-        json.dump({
-            "label": args.label,
-            "generated_at": datetime.now().isoformat(),
-            "system_prompt": current_system_prompt,
-            "aggregates": aggregates,
-            "records": records,
-        }, f, indent=2)
+        json.dump(
+            {
+                "label": args.label,
+                "generated_at": datetime.now().isoformat(),
+                "system_prompt": current_system_prompt,
+                "aggregates": aggregates,
+                "records": records,
+            },
+            f,
+            indent=2,
+        )
 
     write_markdown_report(aggregates, records, report_path, label=args.label)
 

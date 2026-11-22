@@ -18,21 +18,22 @@ def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
     if "day" in exc.detail:
         message = "You've reached today's message limit. Please try again tomorrow."
     else:
-        message = "You're sending messages too fast. Please wait a moment and try again."
+        message = (
+            "You're sending messages too fast. Please wait a moment and try again."
+        )
 
     response = project_return(status_code=429, error=message)
     return limiter._inject_headers(response, request.state.view_rate_limit)
 
-origins = [
-    "http://localhost:5173"
-]
+
+origins = ["http://localhost:5173"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=['*']
+    allow_headers=["*"],
 )
 
 app.include_router(api_v1_router, prefix="/api/v1")

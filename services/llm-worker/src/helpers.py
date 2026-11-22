@@ -23,8 +23,7 @@ def load_pdf_file(data):
 
 
 def text_split(documents):
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500, chunk_overlap=20)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20)
     text_chunks = text_splitter.split_documents(documents)
     return text_chunks
 
@@ -42,9 +41,7 @@ def download_embedding_model():
 
     model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
-    langchain_embeddings = HuggingFaceEmbeddings(
-        model_name=model_name
-    )
+    langchain_embeddings = HuggingFaceEmbeddings(model_name=model_name)
 
     raw_embedding_model = SentenceTransformer(model_name)
 

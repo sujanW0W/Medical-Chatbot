@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 
-from uuid import UUID
 
 from langchain_pinecone import PineconeVectorStore
 
@@ -25,12 +24,10 @@ index_name = "medical-chatbot"
 # Load Existing Index
 
 doc_store = PineconeVectorStore.from_existing_index(
-    index_name=index_name,
-    embedding=langchain_embeddings
+    index_name=index_name, embedding=langchain_embeddings
 )
 
-retriever = doc_store.as_retriever(
-    search_type="similarity", search_kwargs={"k": 3})
+retriever = doc_store.as_retriever(search_type="similarity", search_kwargs={"k": 3})
 
 llm = get_chat_model()
 
@@ -60,15 +57,18 @@ def route_tools(state: AgentState):
     query = state["messages"][-1].content
     # Let LLM decide which tool to use
     messages = [
-        {"role": "system", "content": (
-            "Decide which tool should answer the user's medical question:\n"
-            "- 'retrieve': stable, general medical knowledge - conditions, "
-            "symptoms, causes, physiology, standard treatments.\n"
-            "- 'web_search': anything time-sensitive - the latest/current/newest "
-            "drug approvals, guidelines, recalls, research, or outbreaks, or a "
-            "question using words like 'latest', 'current', 'recent', 'this year'.\n"
-            "Respond with exactly one word: retrieve or web_search."
-        )},
+        {
+            "role": "system",
+            "content": (
+                "Decide which tool should answer the user's medical question:\n"
+                "- 'retrieve': stable, general medical knowledge - conditions, "
+                "symptoms, causes, physiology, standard treatments.\n"
+                "- 'web_search': anything time-sensitive - the latest/current/newest "
+                "drug approvals, guidelines, recalls, research, or outbreaks, or a "
+                "question using words like 'latest', 'current', 'recent', 'this year'.\n"
+                "Respond with exactly one word: retrieve or web_search."
+            ),
+        },
         {"role": "user", "content": query},
     ]
 
@@ -83,10 +83,7 @@ def route_tools(state: AgentState):
 
 
 # Add conditional routing based on query type
-graph_builder.add_conditional_edges(
-    START,
-    route_tools
-)
+graph_builder.add_conditional_edges(START, route_tools)
 
 # Update graph with new edges
 graph_builder.add_edge("retrieve", "synthesize")

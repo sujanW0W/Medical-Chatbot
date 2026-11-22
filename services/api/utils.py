@@ -6,18 +6,10 @@ def project_return(status_code, data: Any | None = None, error: str | None = Non
     if error:
         return JSONResponse(
             status_code=status_code,
-            content={
-                "status": status_code,
-                "data": None,
-                "error": error
-            }
+            content={"status": status_code, "data": None, "error": error},
         )
 
     return JSONResponse(
         status_code=status_code,
-        content={
-            "status": status_code,
-            "data": data,
-            "error": None
-        }
+        content={"status": status_code, "data": data, "error": None},
     )

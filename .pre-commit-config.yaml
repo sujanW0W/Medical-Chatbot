@@ -1,0 +1,28 @@
+# Mirrors .github/workflows/ci.yml's lint jobs, run locally before a push
+# instead of only discovering failures once CI runs on the PR.
+#
+# One-time setup per clone:
+#   pip install pre-commit
+#   pre-commit install --hook-type pre-push
+#
+# Runs automatically on `git push` from then on. Manual run:
+#   pre-commit run --hook-stage pre-push --all-files
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.6 # keep in sync with the `pip install ruff==...` pin in ci.yml
+    hooks:
+      - id: ruff-check
+        name: ruff (api + llm-worker)
+        args: [services/api, services/llm-worker]
+        pass_filenames: false
+        stages: [pre-push]
+
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: eslint (frontend)
+        entry: bash -c 'cd frontend && pnpm run lint'
+        language: system
+        pass_filenames: false
+        stages: [pre-push]

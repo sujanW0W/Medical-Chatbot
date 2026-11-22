@@ -31,7 +31,7 @@ def generate_title(session_id: str, user_msg):
 
         #         title = response["messages"][-1].content
 
-        title = ' '.join(user_msg["content"].split()[:10])
+        title = " ".join(user_msg["content"].split()[:10])
 
         with SessionLocal.begin() as session:
             stmt = select(Session).where(Session.id == session_id)

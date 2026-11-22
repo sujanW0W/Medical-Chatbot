@@ -1,0 +1,8 @@
+extend-exclude = ["**/alembic/versions/*"]
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = [
+    "F403", # star imports (`from x import *`) are this codebase's established flat-import style
+    "F405", # names possibly undefined from star imports - same reason as F403
+]
