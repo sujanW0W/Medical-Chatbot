@@ -1,16 +1,23 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
 from helper import *
 from schemas import *
 from utils import project_return
 from celery_app import celery_app
 from models.sessions import Conversation
 from response_models import *
+from limiter import limiter
 
 router = APIRouter()
 
+# Shared bucket across both "ask" routes (new session + existing session) -
+# a caller can't bypass the limit by alternating between them. 5/minute caps
+# abuse bursts; 50/day caps worst-case spend exposure from a single IP.
+ASK_RATE_LIMIT = "5/minute;50/day"
+
 
 @router.post("/ask")
-def ask_new_session(query: Query):
+@limiter.shared_limit(ASK_RATE_LIMIT, scope="chat_ask")
+def ask_new_session(request: Request, query: Query):
     try:
         session = create_session()
         print(session)
@@ -64,7 +71,8 @@ def ask_new_session(query: Query):
 
 
 @router.post("/ask/{session_id}")
-def ask(session_id: str, query: Query):
+@limiter.shared_limit(ASK_RATE_LIMIT, scope="chat_ask")
+def ask(request: Request, session_id: str, query: Query):
     try:
         if not session_exists(session_id):
             return project_return(
