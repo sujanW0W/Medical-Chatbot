@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { cn } from "./lib/utils";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { fetchSessions, renameSession, deleteSession } from "./queries";
 import { useSession } from "./contexts/SessionContext";
 import type { Session } from "./types";
@@ -27,6 +28,9 @@ function SidebarUI() {
         mutationFn: renameSession,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["sessions"] })
+        },
+        onError: (error) => {
+            toast.error(error.message || "Couldn't rename chat. Please try again.")
         }
     })
 
@@ -38,6 +42,9 @@ function SidebarUI() {
                 setActiveSessionId(undefined)
             }
             setDeleteTarget(undefined)
+        },
+        onError: (error) => {
+            toast.error(error.message || "Couldn't delete chat. Please try again.")
         }
     })
 
@@ -56,8 +63,8 @@ function SidebarUI() {
 
     return (
         <>
-            <Sidebar className="[&>div:first-child]:overflow-y-auto [&>*]:overflow-x-hidden !border-r-0 bg-sidebar-background" collapsible="icon">
-                <SidebarHeader className="sticky top-0 z-10 bg-sidebar-background shrink-0">
+            <Sidebar className="[&>div:first-child]:overflow-y-auto [&>*]:overflow-x-hidden !border-r-0 bg-sidebar" collapsible="icon">
+                <SidebarHeader className="sticky top-0 z-10 bg-sidebar shrink-0">
                     <div className="flex flex-row items-center justify-between group-data-[collapsible=icon]:justify-center">
                         <p className="text-center text-2xl group-data-[collapsible=icon]:sidebar-collapsed-content sidebar-content">Medical Chatbot</p>
                         <SidebarTrigger
@@ -65,7 +72,7 @@ function SidebarUI() {
                         />
                     </div>
                     <hr />
-                    <Item className="p-2 hoverable" onClick={() => setActiveSessionId(undefined)}>
+                    <Item className="p-2 cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" onClick={() => setActiveSessionId(undefined)}>
                         <ItemContent className="flex flex-row gap-2 group-data-[collapsible=icon]:gap-0 items-center group-data-[collapsible=icon]:justify-center sidebar-content">
                             <SquarePen size={20} className="p-0" />
                             <p className="leading-normal group-data-[collapsible=icon]:sidebar-collapsed-content sidebar-content">New Chat</p>
@@ -73,7 +80,7 @@ function SidebarUI() {
                     </Item>
                     <p className="px-2 text-foreground/50 group-data-[collapsible=icon]:sidebar-collapsed-content sidebar-content">Chats</p>
                 </SidebarHeader>
-                <SidebarContent className="p-2 pb-0 overflow-visible relative bg-sidebar-background">
+                <SidebarContent className="p-2 pb-0 overflow-visible relative bg-sidebar">
                     {
                         <SidebarGroup className="p-0 flex-grow sidebar-content">
                             {
@@ -86,7 +93,10 @@ function SidebarUI() {
                                             <Item
                                                 key={session.id}
                                                 onClick={() => renamingId !== session.id && setActiveSessionId(session.id)}
-                                                className={cn("p-2 hoverable group-data-[collapsible=icon]:sidebar-collapsed-content sidebar-content", session.id === activeSessionId && "focused")}
+                                                className={cn(
+                                                    "p-2 cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:sidebar-collapsed-content sidebar-content",
+                                                    session.id === activeSessionId && "bg-sidebar-accent text-sidebar-accent-foreground"
+                                                )}
                                             >
                                                 <ItemContent className="overflow-hidden">
                                                     {
@@ -144,7 +154,7 @@ function SidebarUI() {
                                     )
                             }
                         </SidebarGroup>}
-                    <SidebarFooter className="sticky bottom-0 z-10 bg-sidebar-background p-0 pb-2 shrink-0">
+                    <SidebarFooter className="sticky bottom-0 z-10 bg-sidebar p-0 pb-2 shrink-0">
                         <Item className="p-0">
                             <ItemContent className="flex flex-row gap-2 items-center overflow-hidden">
                                 <Avatar className="m-1">

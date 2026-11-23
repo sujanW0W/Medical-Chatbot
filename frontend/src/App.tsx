@@ -3,6 +3,7 @@ import Chat from './Chat'
 import "./App.css"
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SessionProvider } from '@/contexts/SessionProvider'
+import { Toaster } from '@/components/ui/sonner'
 
 const queryClient = new QueryClient()
 
@@ -16,6 +17,7 @@ function App() {
           </AppSidebar>
         </SessionProvider>
       </QueryClientProvider>
+      <Toaster position="top-right" richColors closeButton />
     </div>
   )
 }
