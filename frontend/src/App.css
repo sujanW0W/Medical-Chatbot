@@ -1,15 +1,3 @@
-.hoverable {
-    cursor: pointer;
-}
-
-.hoverable:hover {
-    background-color: #ffffff1a;
-}
-
-.focused {
-    background-color: #ffffff1a;
-}
-
 .markdown *:not(:first-child) {
     margin-top: 12px;
 }
